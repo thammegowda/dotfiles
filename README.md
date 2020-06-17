@@ -14,3 +14,15 @@ git clone https://github.com/thammegowda/dot-files.git ~/dot-files
 # add the bashrc inside this repo to the ~/.bashrc
 echo "source ~/dot-files/.bashrc" >> ~/.bashrc
 ```
+
+
+## Setup miniconda
+
+TODO automate this
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+#wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+
+bash Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3
+~/miniconda3/bin/conda init bash  # this edits ~/.bashrc
+```
