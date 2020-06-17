@@ -1,5 +1,8 @@
 # Path to your oh-my-bash installation.
-export OSH=~tgowda/.oh-my-bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+export OSH=$DIR/.oh-my-bash
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
@@ -102,7 +105,7 @@ source $OSH/oh-my-bash.sh
 # alias ohmybash="mate ~/.oh-my-bash"
 
 # TG's custom
-source ~/slurm-env.sh
+source $DIR/slurm-env.sh
 
 #stty -ixon
 
@@ -136,24 +139,5 @@ alias cd="mycd"
 
 
 export PATH="${PATH}:~/bin"
-# TACC stuff
-module load cuda git 
-#conda activate /scratch/07394/tgowda/conda_envs/rtg  # default env
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/work/07394/tgowda/frontera/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/work/07394/tgowda/frontera/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/work/07394/tgowda/frontera/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/work/07394/tgowda/frontera/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
 
 #export PATH=
