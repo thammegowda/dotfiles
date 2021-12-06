@@ -90,13 +90,16 @@ chroot(){
 
 # show virtualenvwrapper
 my_ve(){
-    if [ -n "$VIRTUAL_ENV" ]
-    then
+    if [ -n "$CONDA_DEFAULT_ENV" ]; then
+        echo "${bold_purple}($CONDA_DEFAULT_ENV)${normal}"
+    elif [ -n "$VIRTUAL_ENV" ]; then
         my_ps_ve="${bold_purple}$ve${normal}";
         echo "($my_ps_ve)";
     fi
     echo "";
-    }
+}
+
+
 
 prompt() {
 
@@ -107,8 +110,8 @@ prompt() {
     my_ps_user="$BOLD$GREEN\u${normal}"
     my_ps_root="${bold_red}\u${normal}";
 
-    if [ -n "$VIRTUAL_ENV" ]
-    then
+        
+    if [ -n "$VIRTUAL_ENV" ]; then
         ve=`basename $VIRTUAL_ENV`;
     fi
 
@@ -123,8 +126,8 @@ prompt() {
     esac
 }
 
-PS2="└─▪ "
 
+PS2="└─▪ "
 
 
 safe_append_prompt_command prompt

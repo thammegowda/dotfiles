@@ -6,9 +6,9 @@ export OSH=$DIR/.oh-my-bash
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
-OSH_THEME="font"
-OSH_THEME="powerline-plain"  # supports conda
-
+#OSH_THEME="font"
+#OSH_THEME="powerline-plain"  # supports conda
+OSH_THEME="mairan"
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
@@ -113,6 +113,7 @@ export TERM=xterm-256color
 alias emc="emacsclient -a ''"
 alias emq="emacs -q -nw"
 alias ls='ls --color=auto'
+alias lowercase="awkg 'print(R0.lower())'"
 declare -a DIR_HIST=()
 
 function mycd() {
