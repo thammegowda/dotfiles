@@ -141,4 +141,9 @@ alias cd="mycd"
 
 export PATH="${PATH}:~/bin"
 
+
+# used for exclusion;; eg. ls !(file.txt)    or rm !(file.txt)
+shopt -s extglob
+
+
 #export PATH=
