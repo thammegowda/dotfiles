@@ -2,11 +2,12 @@
 format="\"%8i %9g %9u %5P %35j %2t %12M %12l %5D %3C %4m %R %H %I %J %z\""
 format="\"%8i %8g %9u %5P %30j %2t %12M %12l %5D %3C %4m %10R %10b %S\""
 flags="-S +i -o ${format}"
+
 # Show the status of only your jobs
-alias q="squeue -u $USER ${flags}"
+alias q="squeue -u $USER ${flags} && squeue -h -u $USER -o '%t' | sort | uniq -c"
 # Show the status of all cluster jobs
 #alias qa="squeue -a ${flags}"
-alias qa="squeue -p isi ${flags}"
+alias qa="squeue -p isi ${flags} && squeue -h -p isi -o '%t' | sort | uniq -c"
 alias qaa="squeue ${flags}"
 # Show detailed information about the given job ID
 alias c="scontrol show jobid -dd"
