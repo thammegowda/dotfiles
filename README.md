@@ -10,9 +10,9 @@ The goak is to be able to quickly setup work place on new machines.
 ## Setup
 
 ```bash
-git clone https://github.com/thammegowda/dot-files.git ~/dot-files
+git clone https://github.com/thammegowda/dot-files.git ~/dotfiles
 # add the bashrc inside this repo to the ~/.bashrc
-echo "source ~/dot-files/.bashrc" >> ~/.bashrc
+echo "source ~/dotfiles/.bashrc" >> ~/.bashrc
 ```
 
 
