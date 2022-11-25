@@ -2,16 +2,21 @@
 
 set -e
 
-log() {
-    echo "$@" >&2
-}
+log() { echo "$@" >&2 ; }
 
-DOTFILES=~/.dotfiles
-if [[ -d $DOTFILES ]]; then
+DOTFS=~/.dotfiles
+if [[ -d $DOTFS ]]; then
     log "$DOTFS already exists. skipping";
     exit 2
 fi
 
-git clone https://github.com/thammegowda/dotfiles.git --depth 1 $DOTFILES
+git clone https://github.com/thammegowda/dotfiles.git --depth 1 $DOTFS
 
-echo "source $DOTFILES/.bashrc" >> ~/.bashrc
+echo "source $DOTFS/.bashrc" >> ~/.bashrc
+
+for f in .tmux.conf .emacs.d; do 
+    [[ -f $HOME/$f || -d $HOME/$f ]] && mv $HOME/$f{,.tg.bak}
+    ln -s $DOTFS/$f $HOME/$f
+done
+
+log "Installation done. Open new shell to initialize new environment"
