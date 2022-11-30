@@ -139,7 +139,7 @@ alias cdd=$(which cd)
 alias cd="mycd"
 
 
-export PATH="${PATH}:~/bin"
+export PATH="${PATH}:$HOME/bin:$HOME/.local/bin"
 
 
 # used for exclusion;; eg. ls !(file.txt)    or rm !(file.txt)
