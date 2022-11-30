@@ -80,7 +80,7 @@ source $OSH/oh-my-bash.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
@@ -140,7 +140,6 @@ alias cd="mycd"
 
 
 export PATH="${PATH}:$HOME/bin:$HOME/.local/bin"
-
 
 # used for exclusion;; eg. ls !(file.txt)    or rm !(file.txt)
 shopt -s extglob

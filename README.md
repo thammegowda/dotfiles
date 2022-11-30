@@ -6,13 +6,10 @@ So full credits to original authors.
 
 The goak is to be able to quickly setup work place on new machines. 
 
-
 ## Setup
 
 ```bash
-git clone https://github.com/thammegowda/dot-files.git ~/dotfiles
-# add the bashrc inside this repo to the ~/.bashrc
-echo "source ~/dotfiles/.bashrc" >> ~/.bashrc
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/thammegowda/dotfiles/master/setup.bash)"
 ```
 
 
