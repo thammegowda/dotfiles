@@ -119,7 +119,9 @@ declare -a DIR_HIST=()
 function mycd() {
     history -w # write current history file
     builtin cd "$@" # do actual cd
-    export HISTFILE="$PWD/.history.$USER.txt" # set a new history file
+    hist_dir="$HOME/.histories$(realpath $PWD)"
+    mkdir -p "$(dirname ${hist_dir})"
+    export HISTFILE="${hist_dir}.history" # set a new history file
     history -c # clear memory
     history -r #read from current histfile
     DIR_HIST=($PWD ${DIR_HIST[@]:0:30}) # Keep only 30
