@@ -113,6 +113,8 @@ export TERM=xterm-256color
 alias emc="emacsclient -a ''"
 alias emq="emacs -q -nw"
 alias ls='ls --color=auto'
+alias ll='ls -l'
+alias realpwd='realpath $PWD'
 alias lowercase="awkg 'print(R0.lower())'"
 declare -a DIR_HIST=()
 
