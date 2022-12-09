@@ -115,6 +115,7 @@ alias emq="emacs -q -nw"
 alias ls='ls --color=auto'
 alias ll='ls -l'
 alias realpwd='realpath $PWD'
+alias awkt="awk -F '\t' -v OFS='\t'"
 alias lowercase="awkg 'print(R0.lower())'"
 declare -a DIR_HIST=()
 
