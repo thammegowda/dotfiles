@@ -15,11 +15,15 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/thammegowda/dotfiles/mas
 
 ## Setup miniconda
 
-TODO automate this
 ```bash
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-#wget https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-
-bash Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3
-~/miniconda3/bin/conda init bash  # this edits ~/.bashrc
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O conda-setup.sh \
+  && bash conda-setup.sh -b -p ~/miniconda3 \
+  && ~/miniconda3/bin/conda init bash \
+  && rm conda-setup.sh
 ```
+
+Install conda packages
+```bash
+conda install -y -c conda-forge byobu emacs
+```
+  
