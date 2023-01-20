@@ -28,4 +28,8 @@ which conda || {
   && rm conda-setup.sh
 }
 
+# store git
+
+git config --global credential.helper store
+
 log "Installation done. Open new shell to initialize new environment"
