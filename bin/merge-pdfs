@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import argparse
+import PyPDF2
+
+def merge_pdfs(pdf_files, output_file):
+    pdf_writer = PyPDF2.PdfWriter()
+    for file in pdf_files:
+        pdf_reader = PyPDF2.PdfReader(file)
+        for page in pdf_reader.pages:
+            pdf_writer.add_page(page)
+
+    with open(output_file, 'wb') as f:
+        pdf_writer.write(f)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Merge multiple PDF files into one file')
+    parser.add_argument('pdf_files', nargs='+', help='The PDF files to merge')
+    parser.add_argument('output_file', help='The output file')
+    args = parser.parse_args()
+
+    # Merge the PDF files
+    merge_pdfs(args.pdf_files, args.output_file)
