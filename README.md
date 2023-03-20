@@ -12,7 +12,13 @@ The goak is to be able to quickly setup work place on new machines.
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/thammegowda/dotfiles/master/setup.bash)"
 ```
 
-Install conda packages
+(Optional) If `.bashrc` isnt automatically sourced by shell (due to misconfig of profiles)
+
+```bash
+ echo "[[ -f ~/.bashrc ]] && source ~/.bashrc" >> ~/.bash_profile
+```
+
+(Optional) Install conda packages
 ```bash
 conda install -y -c conda-forge byobu emacs
 ```
