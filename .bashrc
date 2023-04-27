@@ -150,5 +150,8 @@ export PATH="${PATH}:$HOME/bin:$HOME/.local/bin"
 # used for exclusion;; eg. ls !(file.txt)    or rm !(file.txt)
 shopt -s extglob
 
+# this fixes bash tring to be oversmart by replacing $var with \$var during tab-tab completion
+shopt -u progcomp
+
 
 #export PATH=
