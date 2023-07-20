@@ -20,7 +20,7 @@ for f in .tmux.conf .emacs.d; do
 done
 
 # disabled; #TODO: pass CLI arg as --conda
-[[ 1 -eq 2 ]] || {
+[[ 1 -eq 1 ]] || {
     which conda || {
       log "Installing miniconda3..."
       wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O conda-setup.sh \
