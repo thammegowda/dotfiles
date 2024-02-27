@@ -21,12 +21,12 @@ done
 
 # disabled; #TODO: pass CLI arg as --conda
 [[ 1 -eq 1 ]] || {
-    which conda || {
-      log "Installing miniconda3..."
-      wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O conda-setup.sh \
-      && bash conda-setup.sh -b -p ~/miniconda3 \
-      && ~/miniconda3/bin/conda init bash \
-      && rm conda-setup.sh
+    which mamba || {
+      log "Installing mamba..."
+      name=Miniforge3-$(uname)-$(uname -m).sh
+      wget "https://github.com/conda-forge/miniforge/releases/latest/download/$name" \
+        && bash $name -b -p ~/mambaforge && ~/mambaforge/bin/mamba init bash \
+        && rm $name
     }
 }
 
