@@ -19,6 +19,9 @@ for f in .tmux.conf .emacs.d; do
     ln -s $DOTFS/$f $HOME/$f
 done
 
+# profile file, if missing
+[[ -f ~/.bash_profile ]] || echo "[[ -f ~/.bashrc ]] && source ~/.bashrc" >> ~/.bash_profile
+
 # disabled; #TODO: pass CLI arg as --conda
 [[ 1 -eq 1 ]] || {
     which mamba || {
