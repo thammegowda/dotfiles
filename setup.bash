@@ -34,7 +34,15 @@ done
 }
 
 # store git
-
 git config --global credential.helper store
+
+# htop rc
+mkdir -p $HOME/.config/htop/
+if [[ -e $HOME/.config/htop/htoprc ]]; then 
+    rm -f $HOME/.config/htop/htoprc.bak
+    mv $HOME/.config/htop/htoprc{,.bak}
+fi
+ln -s $DOTFS/htoprc $HOME/.config/htop/htoprc
+
 
 log "Installation done. Open new shell to initialize new environment"
