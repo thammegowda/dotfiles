@@ -33,8 +33,13 @@ done
     }
 }
 
-# store git
-git config --global credential.helper store
+# git config --global credential.helper store
+#  ^^ basic credential manager; it is not good enough for azure devops multifactor authentication
+# For azure devops, use git-credential-manager 
+#  Download and install a deb from https://github.com/git-ecosystem/git-credential-manager/releases  
+set -eux 
+git-credential-manager configure
+git config --global credential.credentialStore cache
 
 # htop rc
 mkdir -p $HOME/.config/htop/
