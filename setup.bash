@@ -42,7 +42,7 @@ set -eux
 # install git credential manager if necessary; assuming linux_amd64
 which git-credential-manager || {
     GCM_URL="https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.6.1/gcm-linux_amd64.2.6.1.deb"   
-    GCM_FILE=$(basename $URL)
+    GCM_FILE=$(basename $GCM_URL)
     wget $GCM_URL
     sudo dpkg -i $GCM_FILE
     rm -f $GCM_FILE
