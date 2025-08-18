@@ -50,7 +50,7 @@ which git-credential-manager || {
 
 git-credential-manager configure
 #git config --global credential.credentialStore cache
-git config --global credential.credentialStore store
+git config --global credential.credentialStore plaintext
 
 # htop rc
 mkdir -p $HOME/.config/htop/
