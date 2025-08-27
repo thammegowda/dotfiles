@@ -49,8 +49,11 @@ which git-credential-manager || {
 }
 
 git-credential-manager configure
-#git config --global credential.credentialStore cache
+# git config --global credential.credentialStore cache
 git config --global credential.credentialStore plaintext
+
+# git config --global user.name ""
+# git config --global user.email ""
 
 # htop rc
 mkdir -p $HOME/.config/htop/
