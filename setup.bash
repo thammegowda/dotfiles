@@ -28,7 +28,7 @@ done
       log "Installing mamba..."
       name=Miniforge3-$(uname)-$(uname -m).sh
       wget "https://github.com/conda-forge/miniforge/releases/latest/download/$name" \
-        && bash $name -b -p ~/mambaforge && ~/mambaforge/bin/mamba init bash \
+        && bash $name -b -p ~/mambaforge && ~/mambaforge/bin/mamba shell init -s bash \
         && rm $name
     }
 }
