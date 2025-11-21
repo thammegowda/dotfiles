@@ -54,8 +54,10 @@ git config --global credential.credentialStore plaintext
 # for github
 git config --global credential.githubAuthMode device
 git config --global init.defaultBranch main
-# TODO
+# TODO: user settings 
 #git config --global user.name "TG Gowda"; git config --global user.email "thammegowda@users.noreply.github.com"
+echo ".history*" >> ~/.gitignore_global && git config --global core.excludesfile ~/.gitignore_global
+
 
 # htop rc
 mkdir -p $HOME/.config/htop/
@@ -63,6 +65,7 @@ if [[ -e $HOME/.config/htop/htoprc ]]; then
     rm -f $HOME/.config/htop/htoprc.bak
     mv $HOME/.config/htop/htoprc{,.bak}
 fi
+mkdir -p $HOME/.config/htop
 ln -s $DOTFS/htoprc $HOME/.config/htop/htoprc
 
 
