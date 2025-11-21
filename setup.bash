@@ -52,8 +52,9 @@ git-credential-manager configure
 # git config --global credential.credentialStore cache
 git config --global credential.credentialStore plaintext
 
-# git config --global user.name ""
-# git config --global user.email ""
+git config --global init.defaultBranch main
+# TODO
+#git config --global user.name "TG Gowda"; git config --global user.email "thammegowda@users.noreply.github.com"
 
 # htop rc
 mkdir -p $HOME/.config/htop/
