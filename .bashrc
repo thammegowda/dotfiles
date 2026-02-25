@@ -153,5 +153,9 @@ shopt -s extglob
 # this fixes bash tring to be oversmart by replacing $var with \$var during tab-tab completion
 shopt -u progcomp
 
+# this is to disable CTRL-S; funny that vscode sends CTRL-S to tmux inside terminal but wont let CTRL-Q to terminal
+# other work around to regain tmux session: tmux list-panes -a ;      tmux send-keys -t <pane-id> C-q
+stty -ixon
+
 
 #export PATH=
