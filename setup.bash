@@ -47,12 +47,22 @@ which git-credential-manager || {
     sudo dpkg -i $GCM_FILE
     rm -f $GCM_FILE
 }
+# xdg-open is needed for GCM to launch a browser on Linux
+which xdg-open || sudo apt-get install -y xdg-utils
 
 git-credential-manager configure
 # git config --global credential.credentialStore cache
 git config --global credential.credentialStore plaintext
+# for azure devops: use browser-based OAuth (not device code)
+git config --global credential.msauthFlow system
+git config --global credential.azreposCredentialType oauth
+# MSAL requires DISPLAY to be set before it attempts browser auth.
+# On headless Linux (e.g. VS Code remote), DISPLAY is unset, causing MSAL
+# to skip browser flow. Setting a dummy DISPLAY lets xdg-open fall through
+# to $BROWSER (VS Code's helper that opens URLs on the local machine).
+[[ -z "${DISPLAY:-}" ]] && echo 'export DISPLAY=:0' >> ~/.bashrc
 # for github
-git config --global credential.githubAuthMode device
+git config --global credential.githubAuthModes browser
 git config --global init.defaultBranch main
 # TODO: user settings 
 #git config --global user.name "TG Gowda"; git config --global user.email "thammegowda@users.noreply.github.com"
