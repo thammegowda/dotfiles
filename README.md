@@ -22,4 +22,11 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/thammegowda/dotfiles/mas
 ```bash
 conda install -y -c conda-forge byobu emacs
 ```
+
+## macOS
+
+Minimal setup (Git Credential Manager only, no bashrc/dotfiles):
+```bash
+bash setup-mac.sh
+```
   
