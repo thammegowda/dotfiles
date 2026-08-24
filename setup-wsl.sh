@@ -1,13 +1,26 @@
 #!/usr/bin/env bash
 
-# Configure Ubuntu to use GCM from windows: for azure devops
-# assumption: you have already installed git for windows: https://github.com/git-for-windows/git/releases
-[[ "$(uname -m)" == "aarch64" ]] && git_dir=clangarm64 || git_dir=mingw64
-echo git config --global credential.helper "/mnt/c/Program\ Files/Git/$git_dir/bin/git-credential-manager.exe";
-echo git config --global credential.useHttpPath true
+set -euo pipefail
 
+manager=
+for candidate in \
+	'/mnt/c/Program Files/Git/mingw64/bin/git-credential-manager.exe' \
+	'/mnt/c/Program Files/Git/clangarm64/bin/git-credential-manager.exe'
+do
+	if [[ -f $candidate ]]; then
+		manager=$candidate
+		break
+	fi
+done
 
-# browser integration from WSL: so other azure services may use browser to do device login 
-sudo add-apt-repository ppa:wslutilities/wslu
-sudo apt update
-sudo apt install wslu
+if [[ -z $manager ]]; then
+	printf '%s\n' 'Git Credential Manager was not found. Install Git for Windows first.' >&2
+	exit 1
+fi
+
+git config --global credential.helper "${manager// /\\ }"
+git config --global credential.useHttpPath true
+git config --global credential.githubAuthModes browser
+git config --global init.defaultBranch main
+
+printf 'WSL now uses %s\n' "$manager"
