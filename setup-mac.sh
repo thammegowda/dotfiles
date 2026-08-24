@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Minimal macOS setup: just Git Credential Manager (GCM).
-# No bashrc / oh-my-bash / dotfile symlinks here -- macOS is a client device.
+# Minimal macOS setup: Git Credential Manager only.
+# macOS remains a client device and does not install the Bash dotfiles.
 # Ref: https://github.com/git-ecosystem/git-credential-manager
 
-set -eux
+set -euo pipefail
 
 # Homebrew is required
 command -v brew >/dev/null || {
@@ -12,16 +12,12 @@ command -v brew >/dev/null || {
     exit 1
 }
 
-# install git-credential-manager if necessary
 command -v git-credential-manager >/dev/null || brew install --cask git-credential-manager
 
 git-credential-manager configure
-# macOS: store credentials in the login keychain (default, but set explicitly)
 git config --global credential.credentialStore keychain
-# for azure devops: use browser-based OAuth (not device code)
 git config --global credential.msauthFlow system
 git config --global credential.azreposCredentialType oauth
-# for github
 git config --global credential.githubAuthModes browser
 git config --global init.defaultBranch main
 

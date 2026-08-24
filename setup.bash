@@ -1,82 +1,173 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-log() { echo "$@" >&2 ; }
+readonly REPO_URL=https://github.com/thammegowda/dotfiles.git
+readonly GCM_RELEASE_API=https://api.github.com/repos/git-ecosystem/git-credential-manager/releases/latest
 
-DOTFS=~/.dotfiles
-if [[ -d $DOTFS ]]; then
-    log "$DOTFS already exists. skipping";
-    exit 2
-fi
+log() {
+    printf '%s\n' "$*" >&2
+}
 
-git clone https://github.com/thammegowda/dotfiles.git --depth 1 $DOTFS
+as_root() {
+    if ((EUID == 0)); then
+        "$@"
+    elif command -v sudo >/dev/null; then
+        sudo "$@"
+    else
+        log "Root access is required to install packages; install sudo or run as root"
+        return 1
+    fi
+}
 
-echo "source $DOTFS/.bashrc" >> ~/.bashrc
+is_wsl() {
+    [[ -n ${WSL_DISTRO_NAME:-} ]] || [[ -r /proc/version && $(</proc/version) == *[Mm]icrosoft* ]]
+}
 
-for f in .tmux.conf .emacs.d; do 
-    [[ -f $HOME/$f || -d $HOME/$f ]] && mv $HOME/$f{,.tg.bak}
-    ln -s $DOTFS/$f $HOME/$f
-done
+install_ubuntu_dependencies() {
+    local -a packages=()
 
-# profile file, if missing
-[[ -f ~/.bash_profile ]] || echo "[[ -f ~/.bashrc ]] && source ~/.bashrc" >> ~/.bash_profile
+    [[ -r /etc/os-release ]] || return
+    . /etc/os-release
+    [[ ${ID:-} == ubuntu || ${ID:-} == debian ]] || return
 
-# disabled; #TODO: pass CLI arg as --conda
-[[ 1 -eq 1 ]] || {
-    which mamba || {
-      log "Installing mamba..."
-      name=Miniforge3-$(uname)-$(uname -m).sh
-      wget "https://github.com/conda-forge/miniforge/releases/latest/download/$name" \
-        && bash $name -b -p ~/mambaforge && ~/mambaforge/bin/mamba shell init -s bash \
-        && rm $name
+    command -v git >/dev/null || packages+=(git)
+    command -v curl >/dev/null || packages+=(curl)
+    [[ -r /etc/ssl/certs/ca-certificates.crt ]] || packages+=(ca-certificates)
+    if ! is_wsl; then
+        command -v xdg-open >/dev/null || packages+=(xdg-utils)
+        if ! command -v git-credential-manager >/dev/null; then
+            command -v jq >/dev/null || packages+=(jq)
+        fi
+    fi
+
+    ((${#packages[@]} == 0)) && return
+    log "Installing Ubuntu dependencies: ${packages[*]}"
+    as_root env DEBIAN_FRONTEND=noninteractive apt-get update
+    as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "${packages[@]}"
+}
+
+gcm_runtime() {
+    case $(uname -m) in
+    x86_64 | amd64) printf '%s\n' x64 ;;
+    aarch64 | arm64) printf '%s\n' arm64 ;;
+    *)
+        log "Git Credential Manager does not provide a Debian package for $(uname -m)"
+        return 1
+        ;;
+    esac
+}
+
+latest_gcm_deb_url() {
+    local runtime=$1
+
+    curl -fsSL "$GCM_RELEASE_API" | jq -er --arg prefix "gcm-linux-$runtime-" '
+        .assets
+        | map(select(.name | startswith($prefix)) | select(.name | endswith(".deb")))
+        | first.browser_download_url
+    '
+}
+
+install_gcm() {
+    command -v git-credential-manager >/dev/null && return
+    command -v apt-get >/dev/null || {
+        log "Automatic Git Credential Manager installation requires Ubuntu or Debian"
+        return 1
     }
+
+    local runtime package_url package_file
+    runtime=$(gcm_runtime)
+    package_url=$(latest_gcm_deb_url "$runtime")
+    package_file=$(mktemp --suffix=.deb)
+
+    log "Installing Git Credential Manager from $package_url"
+    if ! curl -fL "$package_url" -o "$package_file"; then
+        rm -f "$package_file"
+        return 1
+    fi
+    if ! as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y "$package_file"; then
+        rm -f "$package_file"
+        return 1
+    fi
+    rm -f "$package_file"
 }
 
-# git config --global credential.helper store
-#  ^^ basic credential manager; it is not good enough for azure devops multifactor authentication
-# For azure devops, use git-credential-manager 
-#  Download and install a deb from https://github.com/git-ecosystem/git-credential-manager/releases  
-
-set -eux 
-# install git credential manager if necessary; assuming linux_amd64
-which git-credential-manager || {
-    GCM_URL="https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.6.1/gcm-linux_amd64.2.6.1.deb"   
-    GCM_FILE=$(basename $GCM_URL)
-    wget $GCM_URL
-    sudo dpkg -i $GCM_FILE
-    rm -f $GCM_FILE
+configure_linux_gcm() {
+    git-credential-manager configure
+    git config --global credential.credentialStore "${GCM_CREDENTIAL_STORE:-cache}"
+    git config --global credential.cacheOptions '--timeout 43200'
+    git config --global credential.msauthFlow system
+    git config --global credential.azreposCredentialType oauth
+    git config --global credential.githubAuthModes browser
 }
-# xdg-open is needed for GCM to launch a browser on Linux
-which xdg-open || sudo apt-get install -y xdg-utils
 
-git-credential-manager configure
-# git config --global credential.credentialStore cache
-git config --global credential.credentialStore plaintext
-# for azure devops: use browser-based OAuth (not device code)
-git config --global credential.msauthFlow system
-git config --global credential.azreposCredentialType oauth
-# MSAL requires DISPLAY to be set before it attempts browser auth.
-# On headless Linux (e.g. VS Code remote), DISPLAY is unset, causing MSAL
-# to skip browser flow. Setting a dummy DISPLAY lets xdg-open fall through
-# to $BROWSER (VS Code's helper that opens URLs on the local machine).
-[[ -z "${DISPLAY:-}" ]] && echo 'export DISPLAY=:0' >> ~/.bashrc
-# for github
-git config --global credential.githubAuthModes browser
-git config --global init.defaultBranch main
-# TODO: user settings 
-#git config --global user.name "TG Gowda"; git config --global user.email "thammegowda@users.noreply.github.com"
-echo ".history*" >> ~/.gitignore_global && git config --global core.excludesfile ~/.gitignore_global
+ensure_line() {
+    local line=$1
+    local file=$2
 
+    touch "$file"
+    grep -Fqx -- "$line" "$file" || printf '\n%s\n' "$line" >> "$file"
+}
 
-# htop rc
-mkdir -p $HOME/.config/htop/
-if [[ -e $HOME/.config/htop/htoprc ]]; then 
-    rm -f $HOME/.config/htop/htoprc.bak
-    mv $HOME/.config/htop/htoprc{,.bak}
+link_file() {
+    local source=$1
+    local destination=$2
+    local backup
+
+    if [[ -L $destination && $(readlink "$destination") == "$source" ]]; then
+        return
+    fi
+    if [[ -e $destination || -L $destination ]]; then
+        backup="${destination}.bak.$(date +%Y%m%d%H%M%S)"
+        log "Moving $destination to $backup"
+        mv "$destination" "$backup"
+    fi
+    mkdir -p "$(dirname "$destination")"
+    ln -s "$source" "$destination"
+}
+
+main() {
+    local dotfiles_dir=${DOTFILES_DIR:-$HOME/.dotfiles}
+    local script_dir source_line
+
+    install_ubuntu_dependencies
+    command -v git >/dev/null || {
+        log "Git is required; automatic package installation supports Ubuntu and Debian"
+        return 1
+    }
+
+    if [[ -n ${BASH_SOURCE[0]:-} && -f ${BASH_SOURCE[0]} ]]; then
+        script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+        [[ -d $script_dir/.git ]] && dotfiles_dir=$script_dir
+    fi
+
+    if [[ ! -d $dotfiles_dir/.git ]]; then
+        if [[ -e $dotfiles_dir ]]; then
+            log "$dotfiles_dir exists but is not a Git clone"
+            return 1
+        fi
+        git clone --depth 1 "$REPO_URL" "$dotfiles_dir"
+    fi
+
+    if is_wsl; then
+        bash "$dotfiles_dir/setup-wsl.sh"
+    else
+        install_gcm
+        configure_linux_gcm
+    fi
+
+    source_line="[[ -r \"$dotfiles_dir/.bashrc\" ]] && source \"$dotfiles_dir/.bashrc\""
+    ensure_line "$source_line" "$HOME/.bashrc"
+
+    git config --global init.defaultBranch main
+    git config --global core.excludesfile "$dotfiles_dir/.gitignore_global"
+
+    link_file "$dotfiles_dir/.tmux.conf" "$HOME/.tmux.conf"
+    link_file "$dotfiles_dir/htoprc" "$HOME/.config/htop/htoprc"
+
+    log "Installation complete. Open a new shell to load the configuration."
+}
+
+if [[ -z ${BASH_SOURCE[0]:-} || ${BASH_SOURCE[0]} == "$0" ]]; then
+    main "$@"
 fi
-mkdir -p $HOME/.config/htop
-ln -s $DOTFS/htoprc $HOME/.config/htop/htoprc
-
-
-log "Installation done. Open new shell to initialize new environment"

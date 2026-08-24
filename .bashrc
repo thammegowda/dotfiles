@@ -1,161 +1,61 @@
-# Path to your oh-my-bash installation.
+[[ $- == *i* ]] || return
+[[ -n ${TG_DOTFILES_LOADED:-} ]] && return
+TG_DOTFILES_LOADED=1
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DOTFILES_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 
-export OSH=$DIR/.oh-my-bash
+export PATH="$HOME/.local/bin:$HOME/bin:$HOME/.cargo/bin:$PATH"
+export CONDA_CHANGEPS1=false
 
-# Set name of the theme to load. Optionally, if you set this to "random"
-# it'll load a random theme each time that oh-my-bash is loaded.
-#OSH_THEME="font"
-#OSH_THEME="powerline-plain"  # supports conda
-OSH_THEME="mairan"
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+shopt -s extglob histappend progcomp
+HISTCONTROL=ignoreboth:erasedups
+HISTSIZE=50000
+HISTFILESIZE=100000
 
-# Uncomment the following line to use hyphen-insensitive completion. Case
-# sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+source "$DOTFILES_DIR/slurm-env.sh"
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_OSH_DAYS=13
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
-
-# Would you like to use another custom folder than $OSH/custom?
-# OSH_CUSTOM=/path/to/new-custom-folder
-
-# Which completions would you like to load? (completions can be found in ~/.oh-my-bash/completions/*)
-# Custom completions may be added to ~/.oh-my-bash/custom/completions/
-# Example format: completions=(ssh git bundler gem pip pip3)
-# Add wisely, as too many completions slow down shell startup.
-completions=(
-  git
-  composer
-  ssh
-)
-
-# Which aliases would you like to load? (aliases can be found in ~/.oh-my-bash/aliases/*)
-# Custom aliases may be added to ~/.oh-my-bash/custom/aliases/
-# Example format: aliases=(vagrant composer git-avh)
-# Add wisely, as too many aliases slow down shell startup.
-aliases=(
-  general
-)
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-bash/plugins/*)
-# Custom plugins may be added to ~/.oh-my-bash/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  git
-  bashmarks
-)
-
-source $OSH/oh-my-bash.sh
-
-# User configuration
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/rsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-bash libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-bash
-# users are encouraged to define aliases within the OSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias bashconfig="mate ~/.bashrc"
-# alias ohmybash="mate ~/.oh-my-bash"
-
-# TG's custom
-source $DIR/slurm-env.sh
-
-#stty -ixon
-
-export TERM=xterm-256color
 alias emc="emacsclient -a ''"
-alias emq="emacs -q -nw"
+alias emq='emacs -q -nw'
 alias ls='ls --color=auto'
 alias ll='ls -l'
-alias realpwd='realpath $PWD'
+alias realpwd='realpath "$PWD"'
 alias awkt="awk -F '\t' -v OFS='\t'"
-alias lowercase="awkg 'print(R0.lower())'"
-declare -a DIR_HIST=()
 
-function mycd() {
-    history -w # write current history file
-    builtin cd "$@" # do actual cd
-    #hist_dir="$HOME/.histories$(realpath $PWD)"
-    #mkdir -p "$(dirname ${hist_dir})"
-    #export HISTFILE="${hist_dir}.history" # set a new history file
-    export HISTFILE=".history" # set a new history file
-    history -c # clear memory
-    history -r #read from current histfile
-    DIR_HIST=($PWD ${DIR_HIST[@]:0:30}) # Keep only 30
+lowercase() {
+  awk '{ print tolower($0) }'
 }
 
-function cdls() {
-    # Prints list of hitorical dirs you have been to
-    for d in ${DIR_HIST[@]}; do
-        echo $d
-    done
+[[ -t 0 ]] && stty -ixon
+
+__tg_git_ref() {
+  TG_GIT_REF=
+  command -v git &>/dev/null || return
+  TG_GIT_REF=$(command git symbolic-ref --quiet --short HEAD 2>/dev/null) ||
+    TG_GIT_REF=$(command git rev-parse --short HEAD 2>/dev/null) ||
+    TG_GIT_REF=
 }
 
-# Replacement for builtin 'cd', wh ich keeps a separate bash-history
-# for every directory.
-shopt -s histappend
-alias cdd=$(which cd)
-alias cd="mycd"
+__tg_prompt() {
+  local environment_name=${CONDA_DEFAULT_ENV:-}
+  local environment_prompt= git_prompt=
 
+  if [[ -z $environment_name && -n ${VIRTUAL_ENV:-} ]]; then
+    environment_name=${VIRTUAL_ENV%/}
+    environment_name=${environment_name##*/}
+  fi
+  [[ -n $environment_name ]] && environment_prompt=" \[\e[35m\]($environment_name)\[\e[0m\]"
 
-export PATH="${PATH}:$HOME/bin:$HOME/.local/bin"
+  __tg_git_ref
+  [[ -n $TG_GIT_REF ]] && git_prompt=" \[\e[36m\][$TG_GIT_REF]\[\e[0m\]"
 
-# used for exclusion;; eg. ls !(file.txt)    or rm !(file.txt)
-shopt -s extglob
+  PS1="\n\[\e[32m\]\u\[\e[0m\]@\[\e[33m\]\h\[\e[0m\] \[\e[34m\]\w\[\e[0m\]${environment_prompt}${git_prompt}\n\\$ "
+}
 
-# this fixes bash tring to be oversmart by replacing $var with \$var during tab-tab completion
-shopt -u progcomp
-
-# this is to disable CTRL-S; funny that vscode sends CTRL-S to tmux inside terminal but wont let CTRL-Q to terminal
-# other work around to regain tmux session: tmux list-panes -a ;      tmux send-keys -t <pane-id> C-q
-stty -ixon
-
-
-#export PATH=
+if [[ $(declare -p PROMPT_COMMAND 2>/dev/null) != 'declare -a'* ]]; then
+  _tg_existing_prompt_command=${PROMPT_COMMAND:-}
+  PROMPT_COMMAND=()
+  [[ -n $_tg_existing_prompt_command ]] && PROMPT_COMMAND+=("$_tg_existing_prompt_command")
+  unset _tg_existing_prompt_command
+fi
+PROMPT_COMMAND+=(__tg_prompt)
+unset DOTFILES_DIR
