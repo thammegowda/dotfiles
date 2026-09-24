@@ -14,8 +14,6 @@ HISTFILESIZE=100000
 
 source "$DOTFILES_DIR/slurm-env.sh"
 
-alias emc="emacsclient -a ''"
-alias emq='emacs -q -nw'
 alias ls='ls --color=auto'
 alias ll='ls -l'
 alias realpwd='realpath "$PWD"'
@@ -59,3 +57,9 @@ if [[ $(declare -p PROMPT_COMMAND 2>/dev/null) != 'declare -a'* ]]; then
 fi
 PROMPT_COMMAND+=(__tg_prompt)
 unset DOTFILES_DIR
+
+
+# Let GCM use VS Code's browser bridge in headless remote terminals.
+if [[ -n ${BROWSER:-} && -n ${VSCODE_IPC_HOOK_CLI:-} && -z ${DISPLAY:-}${WAYLAND_DISPLAY:-} ]]; then
+  export DISPLAY=:0
+fi
