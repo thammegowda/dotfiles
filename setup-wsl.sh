@@ -4,6 +4,7 @@ set -euo pipefail
 
 manager=
 for candidate in \
+	'/mnt/c/Program Files/Git/ucrt64/bin/git-credential-manager.exe' \
 	'/mnt/c/Program Files/Git/mingw64/bin/git-credential-manager.exe' \
 	'/mnt/c/Program Files/Git/clangarm64/bin/git-credential-manager.exe'
 do
