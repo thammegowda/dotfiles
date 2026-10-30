@@ -126,6 +126,17 @@ link_file() {
     ln -s "$source" "$destination"
 }
 
+
+install_mamba() {
+    which mamba || {
+      log "Installing mamba..."
+      name=Miniforge3-$(uname)-$(uname -m).sh
+      wget "https://github.com/conda-forge/miniforge/releases/latest/download/$name" \
+        && bash $name -b -p ~/mambaforge && ~/mambaforge/bin/mamba shell init -s bash \
+        && rm $name
+    }    
+}
+
 main() {
     local dotfiles_dir=${DOTFILES_DIR:-$HOME/.dotfiles}
     local script_dir source_line
